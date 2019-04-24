@@ -70,12 +70,19 @@ class GetCarById(Resource):
     decorators = [auth.login_required]
 
     def get(self, id):
-        # Get all cars list
+        # Get car by id
         for i in range(len(cars)):
             if cars[i]['id'] == id:
                 return {'car': marshal(cars[i], cars_model)}
         return make_response(jsonify({'Error': 'Not found'}), 404)
 
+    def delete(self, id):
+        # Delete car by id
+        for i in range(len(cars)):
+            if cars[i]['id'] == id:
+                cars.remove(cars[i])
+                return make_response(jsonify({'Result': True}), 200)
+        return make_response(jsonify({'Error': 'Not found'}), 404)
 
 
 api.add_resource(GetCarList, '/todo/api/v1/cars', endpoint='cars')
