@@ -1,6 +1,6 @@
 #!flask/bin/python
 
-from flask import Flask, jsonify, abort, make_response, Response
+from flask import Flask, jsonify, abort, make_response, request
 from flask_restful import Api, Resource, reqparse, fields, marshal
 from flask_httpauth import HTTPBasicAuth
 
@@ -66,6 +66,27 @@ class GetCarList(Resource):
         # Get all cars list
         return {'cars': marshal(cars, cars_model)}
 
+    def post(self):
+        # Insert new car
+        # Check the next id
+        new_id = 0
+        for i in range(len(cars)):
+            if cars[i]['id'] > new_id:
+                new_id = cars[i]['id']
+        # New Id to use
+        new_id += 1
+
+        # Parse JSON and create new car
+        args = request.json
+        new_car = {
+            'id': new_id,
+            'name': args['name'],
+            'model': args['model'],
+            'price': args['price']
+        }
+        cars.append(new_car)
+        return {'cars': marshal(new_car, cars_model)}
+
 class GetCarById(Resource):
     decorators = [auth.login_required]
 
@@ -81,7 +102,7 @@ class GetCarById(Resource):
         for i in range(len(cars)):
             if cars[i]['id'] == id:
                 cars.remove(cars[i])
-                return make_response(jsonify({'Result': True}), 200)
+                return make_response(jsonify({'Result': True}), 201)
         return make_response(jsonify({'Error': 'Not found'}), 404)
 
 
