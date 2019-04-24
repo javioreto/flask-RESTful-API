@@ -1,7 +1,7 @@
 #!flask/bin/python
 
-from flask import Flask, jsonify, abort, make_response, request
-from flask_restful import Api, Resource, reqparse, fields, marshal
+from flask import Flask, jsonify, make_response, request
+from flask_restful import Api, Resource, fields, marshal
 from flask_httpauth import HTTPBasicAuth
 
 
@@ -69,23 +69,26 @@ class GetCarList(Resource):
     def post(self):
         # Insert new car
         # Check the next id
-        new_id = 0
-        for i in range(len(cars)):
-            if cars[i]['id'] > new_id:
-                new_id = cars[i]['id']
-        # New Id to use
-        new_id += 1
-
-        # Parse JSON and create new car
         args = request.json
-        new_car = {
-            'id': new_id,
-            'name': args['name'],
-            'model': args['model'],
-            'price': args['price']
-        }
-        cars.append(new_car)
-        return {'cars': marshal(new_car, cars_model)}
+        if 'name' in args and 'model' in args and 'price' in args:
+            new_id = 0
+            for i in range(len(cars)):
+                if cars[i]['id'] > new_id:
+                    new_id = cars[i]['id']
+            # New Id to use
+            new_id += 1
+
+            # Parse JSON and create new car
+            new_car = {
+                'id': new_id,
+                'name': args['name'],
+                'model': args['model'],
+                'price': args['price']
+            }
+            cars.append(new_car)
+            return {'cars': marshal(new_car, cars_model)}
+        else:
+            return make_response(jsonify({'Error': 'Name, model and price are requiered.'}), 400)
 
 class GetCarById(Resource):
     decorators = [auth.login_required]
@@ -110,9 +113,9 @@ class GetCarById(Resource):
         args = request.json
         for i in range(len(cars)):
             if cars[i]['id'] == id:
-                cars[i]['name'] = args['name']
-                cars[i]['model'] = args['model']
-                cars[i]['price'] = args['price']
+                cars[i]['name'] = args['name'] if 'name' in args else cars[i]['name']
+                cars[i]['model'] = args['model'] if 'model' in args else cars[i]['model']
+                cars[i]['price'] = args['price'] if 'price' in args else cars[i]['price']
                 return {'cars': marshal(cars[i], cars_model)}
         return make_response(jsonify({'Error': 'Not found'}), 404)
 
@@ -140,4 +143,4 @@ api.add_resource(GetCarById, '/todo/api/v1/cars/<int:id>', endpoint='car')
 api.add_resource(FilterCars, '/todo/api/v1/cars/filter', endpoint='filter')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
