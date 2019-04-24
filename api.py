@@ -56,7 +56,7 @@ def get_password(user):
 @auth.error_handler
 def unauthorized():
     # when no authorized access return 403
-    return make_response(jsonify({'error': 'Access denied'}), 403)
+    return make_response(jsonify({'Error': 'Access denied'}), 403)
 
 
 class GetCarList(Resource):
@@ -66,9 +66,20 @@ class GetCarList(Resource):
         # Get all cars list
         return {'cars': marshal(cars, cars_model)}
 
+class GetCarById(Resource):
+    decorators = [auth.login_required]
+
+    def get(self, id):
+        # Get all cars list
+        for i in range(len(cars)):
+            if cars[i]['id'] == id:
+                return {'car': marshal(cars[i], cars_model)}
+        return make_response(jsonify({'Error': 'Not found'}), 404)
+
+
 
 api.add_resource(GetCarList, '/todo/api/v1/cars', endpoint='cars')
-
+api.add_resource(GetCarById, '/todo/api/v1/cars/<int:id>', endpoint='car')
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

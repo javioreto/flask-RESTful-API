@@ -11,4 +11,4 @@ pip install -r requirements.txt
 ```
 
 # Execute API server
-- Run python **./api.py** to start the server.
+- Run **python ./api.py** to start the server.
