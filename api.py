@@ -116,9 +116,28 @@ class GetCarById(Resource):
                 return {'cars': marshal(cars[i], cars_model)}
         return make_response(jsonify({'Error': 'Not found'}), 404)
 
+class FilterCars(Resource):
+    decorators = [auth.login_required]
+
+    def post(self):
+        # Filter Cars by min and max price
+        result = []
+        args = request.json
+        min = args['min'] if 'min' in args else 0
+        max = args['max'] if 'max' in args else 9999999999
+    
+        for i in range(len(cars)):
+            if cars[i]['price'] >= min and cars[i]['price'] <= max:
+                result.append(cars[i])
+
+        if len(result) > 0:
+            return {'cars': marshal(result, cars_model)}
+        else:
+            return make_response(jsonify({'Error': 'No content'}), 204)
 
 api.add_resource(GetCarList, '/todo/api/v1/cars', endpoint='cars')
 api.add_resource(GetCarById, '/todo/api/v1/cars/<int:id>', endpoint='car')
+api.add_resource(FilterCars, '/todo/api/v1/cars/filter', endpoint='filter')
 
 if __name__ == '__main__':
     app.run(debug=True)
