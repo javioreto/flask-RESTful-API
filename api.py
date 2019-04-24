@@ -105,6 +105,17 @@ class GetCarById(Resource):
                 return make_response(jsonify({'Result': True}), 201)
         return make_response(jsonify({'Error': 'Not found'}), 404)
 
+    def put(self, id):
+        # Update car by id
+        args = request.json
+        for i in range(len(cars)):
+            if cars[i]['id'] == id:
+                cars[i]['name'] = args['name']
+                cars[i]['model'] = args['model']
+                cars[i]['price'] = args['price']
+                return {'cars': marshal(cars[i], cars_model)}
+        return make_response(jsonify({'Error': 'Not found'}), 404)
+
 
 api.add_resource(GetCarList, '/todo/api/v1/cars', endpoint='cars')
 api.add_resource(GetCarById, '/todo/api/v1/cars/<int:id>', endpoint='car')
